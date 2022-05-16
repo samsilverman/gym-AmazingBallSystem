@@ -1,4 +1,4 @@
-name: gym-abs
+name: gym_abs
 channels:
   - conda-forge
 dependencies:

@@ -15,6 +15,7 @@ import serial
 SERIAL_X_DIM = 0
 SERIAL_Y_DIM = 1
 
+
 class AmazingBallSystemEnv(gym.Env):
     """
     Amazing Ball System gym environment
@@ -64,6 +65,7 @@ class AmazingBallSystemEnv(gym.Env):
 
     The episode terminates at 100 time steps.
     """
+
     def __init__(self, port='/dev/ttyUSB0', calibrate=True, calibrate_file='calibration.csv'):
         """
         Initialize AmazingBallSystemEnv.
@@ -89,7 +91,8 @@ class AmazingBallSystemEnv(gym.Env):
 
         self.calibrate_file = Path(__file__).parent.resolve() / calibrate_file
         if calibrate is False and self.calibrate_file.is_file() is False:
-            print(f'Calibration file {self.calibrate_file} does not exist. Running calibration...')
+            print(
+                f'Calibration file {self.calibrate_file} does not exist. Running calibration...')
             calibrate = True
 
         if calibrate:
@@ -97,14 +100,17 @@ class AmazingBallSystemEnv(gym.Env):
         else:
             self.x_range, self.y_range = self._load_calibration()
 
-        self.action_space = spaces.Box(low=0, high=1, shape=(2,), dtype=np.float16)
+        self.action_space = spaces.Box(
+            low=0, high=1, shape=(2,), dtype=np.float16)
 
         self.observation_space = spaces.Box(low=np.array([self.x_range[0], self.y_range[0]]),
-                                            high=np.array([self.x_range[1], self.y_range[1]]),
+                                            high=np.array(
+                                                [self.x_range[1], self.y_range[1]]),
                                             dtype=np.float16)
 
         # center of board
-        self.goal = [sum(self.x_range) // len(self.x_range), sum(self.y_range) // len(self.y_range)]
+        self.goal = [sum(self.x_range) // len(self.x_range),
+                     sum(self.y_range) // len(self.y_range)]
 
         # find furthest corner from center to be used in distance normalization
         corner_distances = [
@@ -114,6 +120,8 @@ class AmazingBallSystemEnv(gym.Env):
             math.dist([self.x_range[0], self.y_range[1]], self.goal),
         ]
         self.distance_max = max(corner_distances)
+
+        self.position = None
 
         self.current_step = 0
         self.max_step = 100
@@ -145,13 +153,18 @@ class AmazingBallSystemEnv(gym.Env):
 
         state = np.array([x_position, y_position], dtype=np.uint16)
 
-        reward = -math.dist([x_position, y_position], self.goal) / self.distance_max
+        reward = -math.dist([x_position, y_position],
+                            self.goal) / self.distance_max
 
         return state, reward, self.done, []
 
     def reset(self, seed=None):
         """
         Reset an episode of the environment.
+
+        Args:
+            seed:
+                A random seed for initialization (default: `None`).
 
         Returns:
             The initial state of the new episode.
@@ -174,12 +187,6 @@ class AmazingBallSystemEnv(gym.Env):
 
         return np.array([x_position, y_position], dtype=np.uint16)
 
-    def render(self):
-        """
-        TODO
-        """
-        pass
-
     def _load_calibration(self):
         """
         Load a board calibration csv file.
@@ -201,7 +208,8 @@ class AmazingBallSystemEnv(gym.Env):
         Save a board calibration to csv file.
         """
         header = ['x-min', 'x-max', 'y-min', 'y-max']
-        data = [self.x_range[0], self.x_range[1], self.y_range[0], self.y_range[1]]
+        data = [self.x_range[0], self.x_range[1],
+                self.y_range[0], self.y_range[1]]
         with open(self.calibrate_file, 'w', encoding='UTF8', newline='') as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(header)
